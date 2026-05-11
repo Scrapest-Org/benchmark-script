@@ -4,6 +4,8 @@ export interface EnvConfig {
   barkApiKey: string;
   myApiKey: string;
   testAccount: string;
+  redisUrl: string | null;
+  vmName: string;
 }
 
 const VM_MAP: Array<{ key: string; name: string }> = [
@@ -43,11 +45,15 @@ export async function loadEnv(): Promise<EnvConfig> {
     }
   }
 
+  if (env.REDIS_URL) process.env.REDIS_URL = env.REDIS_URL;
+
   return {
     vmConfigs: VM_MAP.map((m) => ({ name: m.name, httpUrl: env[m.key] })),
     barkWsUrl: env.BARK_WS_URL,
     barkApiKey: env.BARK_API_KEY,
     myApiKey: env.MY_API_KEY,
     testAccount: env.TEST_ACCOUNT,
+    redisUrl: env.REDIS_URL ?? null,
+    vmName: env.VM_NAME ?? "default",
   };
 }

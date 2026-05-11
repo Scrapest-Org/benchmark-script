@@ -1,7 +1,9 @@
 import WebSocket from "ws";
+import { redis } from "bun";
 import { loadEnv } from "./env";
 import { ResultsManager } from "./results-manager";
 import { generateReport, saveReport } from "./report";
+import { snowflakeTimestamp } from "./latency-tracker";
 
 const VM_NAME_TO_SOURCE: Record<string, string> = {
   "x-atlanta": "us-east1",
@@ -26,11 +28,20 @@ let isShuttingDown = false;
 const allConnections: WebSocket[] = [];
 
 const env = await loadEnv();
-const manager = new ResultsManager((tweetId, sources) => {
+const useRedis = !!env.redisUrl;
+
+const manager = new ResultsManager(async (tweetId, sources) => {
   const count = sources.size;
   console.log(
     `[Complete] ${tweetId} (${count}/${manager.getPendingCount() + manager.getCompleted().size})`,
   );
+
+  if (useRedis) {
+    const key = `latence:${env.vmName}`;
+    for (const [source, receivedAt] of sources) {
+      redis.hset(key, `${tweetId}:${source}`, String(receivedAt));
+    }
+  }
 });
 
 async function shutdown() {
@@ -51,7 +62,8 @@ async function shutdown() {
   if (pending > 0) console.log(`Pending tweets: ${pending}`);
 
   const report = generateReport(all);
-  await saveReport(report);
+  console.log(`\n${report}`);
+  if (!useRedis) await saveReport(report);
   process.exit(0);
 }
 
