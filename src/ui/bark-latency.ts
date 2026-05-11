@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { snowflakeTimestamp } from "./latency-tracker";
+import { snowflakeTimestamp } from "../lib/latency-tracker";
 
 const barkWsUrl = process.env.BARK_WS_URL!;
 const barkApiKey = process.env.BARK_API_KEY!;

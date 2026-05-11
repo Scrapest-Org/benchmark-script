@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import Redis from "ioredis";
-import { loadEnv } from "./env";
-import { ResultsManager } from "./results-manager";
+import { loadEnv } from "./lib/env";
+import { ResultsManager } from "./lib/results-manager";
 
 const VM_NAME_TO_SOURCE: Record<string, string> = {
   "x-atlanta": "us-east1",
