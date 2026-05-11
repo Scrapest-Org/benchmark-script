@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "ioredis": "^5.10.1",
     "ntp-client": "^0.5.3",
     "ws": "^8.20.0"
   },

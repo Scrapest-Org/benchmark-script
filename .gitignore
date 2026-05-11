@@ -1,3 +1,3 @@
-benchmark.env
+.env
 node_modules/
 results/

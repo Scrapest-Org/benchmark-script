@@ -1,6 +1,6 @@
 import { loadEnv } from "./env";
 
-const env = await loadEnv();
+const env = loadEnv();
 
 async function main() {
   console.log(`Setting up tracking for: ${env.testAccount}`);
