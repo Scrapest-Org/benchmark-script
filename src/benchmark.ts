@@ -1,6 +1,6 @@
 import WebSocket from "ws";
-import Redis from "ioredis";
 import { loadEnv } from "./lib/env";
+import { redis } from "./lib/redis";
 import { ResultsManager } from "./lib/results-manager";
 
 const VM_NAME_TO_SOURCE: Record<string, string> = {
@@ -26,7 +26,6 @@ let isShuttingDown = false;
 const allConnections: WebSocket[] = [];
 
 const env = loadEnv();
-const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
 
 const manager = new ResultsManager(async (tweetId, sources) => {
   const count = sources.size;
