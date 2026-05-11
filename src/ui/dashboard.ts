@@ -16,17 +16,28 @@ Bun.serve({
     try {
       if (url.pathname === "/api/vms") {
         const keys = await redis.keys("latency:*");
-        const vms = (keys as string[]).map((k: string) => k.slice("latency:".length)).sort();
+        const vms = (keys as string[])
+          .map((k: string) => k.slice("latency:".length))
+          .sort();
         return Response.json({ vms });
       }
 
       if (url.pathname === "/api/latency" || url.pathname === "/api/latency/") {
-        const vmName = url.searchParams.get("vm") || "default";
+        const vmName = url.searchParams.get("vm") || "local-dev";
         const key = `latency:${vmName}`;
         const raw = await redis.hgetall(key);
 
-        if (!raw || typeof raw !== "object" || !Object.keys(raw as object).length) {
-          return Response.json({ vmName, tweetCount: 0, dataPointCount: 0, sources: {} });
+        if (
+          !raw ||
+          typeof raw !== "object" ||
+          !Object.keys(raw as object).length
+        ) {
+          return Response.json({
+            vmName,
+            tweetCount: 0,
+            dataPointCount: 0,
+            sources: {},
+          });
         }
 
         const tweets = raw as Record<string, string>;
@@ -71,17 +82,26 @@ Bun.serve({
       }
 
       if (url.pathname === "/api/tweets" || url.pathname === "/api/tweets/") {
-        const vmName = url.searchParams.get("vm") || "default";
+        const vmName = url.searchParams.get("vm") || "local-dev";
         const sourceFilter = url.searchParams.get("source") || "";
         const key = `latency:${vmName}`;
         const raw = await redis.hgetall(key);
 
-        if (!raw || typeof raw !== "object" || !Object.keys(raw as object).length) {
+        if (
+          !raw ||
+          typeof raw !== "object" ||
+          !Object.keys(raw as object).length
+        ) {
           return Response.json({ vmName, entries: [] });
         }
 
         const tweets = raw as Record<string, string>;
-        const entries: Array<{ tweetId: string; source: string; receivedAt: number; latency: number }> = [];
+        const entries: Array<{
+          tweetId: string;
+          source: string;
+          receivedAt: number;
+          latency: number;
+        }> = [];
 
         for (const [field, receivedAtStr] of Object.entries(tweets)) {
           const colonIdx = field.indexOf(":");
@@ -91,7 +111,12 @@ Bun.serve({
           if (sourceFilter && source !== sourceFilter) continue;
           const receivedAt = Number(receivedAtStr);
           const sft = snowflakeTimestamp(tweetId);
-          entries.push({ tweetId, source, receivedAt, latency: Math.abs(receivedAt - sft) });
+          entries.push({
+            tweetId,
+            source,
+            receivedAt,
+            latency: Math.abs(receivedAt - sft),
+          });
         }
 
         return Response.json({ vmName, entries });
@@ -101,7 +126,9 @@ Bun.serve({
       return Response.json({ error: String(e) }, { status: 500 });
     }
 
-    return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+    return new Response(html, {
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
   },
 });
 
